@@ -13,11 +13,13 @@ var newline = "\n";
 var inFilePaths: string[] = [];     // [file...]
 var stripComments: boolean = false; // -c, --stripcomm
 var licenseFilePath: string = "";   // -l, --license [file]
+var keepFirstBlockComment: boolean = false;   // -l, --license [file]
 var outFilePath: string = "";       // -o, --out [file]
 var infoComments: boolean = false;  // -i, --info
 
 var includedFilePaths: {[path: string]: boolean} = {};
 var outLines: string[] = [];
+var isFirstFile: boolean = true;
 
 function printHelp() {
     console.log(`
@@ -29,7 +31,8 @@ Examples: dtsmerge lib.d.ts
 Options:
  -h, --help                                     Print this message and exits.
  -o, --out [file]                               Write output to file. If ommitted outputs is written to console.
- -c, --stripcomm                                Remove comments
+ -s, --stripcomm                                Remove comments
+ -k, --keep                                     Keep first block comment (e.g. license header).
  -l, --license [file]                           A file containing the license header to be added to the output.
  -i, --info                                     Append "// START OF [file]" "// END OF [file]" comments before
                                                 and after each included file
@@ -42,22 +45,30 @@ function exitWithError(err: string, ...optionalParams: any[]) {
     process.exit(-1);
 }
 
-function getCommentFreeLine(line: string, inBlockComment: boolean): [string, boolean, boolean] {
+function getCommentFreeLine(line: string, inBlockComment: boolean, keepFirstBlockComment: boolean): [string, boolean, boolean, boolean] {
 
     var commFreeLine: string[] = [];
     var prevC: string = '';
     var commentExists = inBlockComment;
+    var firstBlockCommentKept = false;
+    var keepingFirstBlockComment = inBlockComment && keepFirstBlockComment;
 
     for (let i=0; i<line.length; i++) {
         let c = line[i];
         if (inBlockComment) {
             if (prevC == '*' && c == '/') {
                 inBlockComment = false;
+                if (keepingFirstBlockComment) {
+                    firstBlockCommentKept = true;
+                    commFreeLine.push('*/');
+                }
+                keepingFirstBlockComment = false;
                 prevC = '';
-            } else {
+                continue;
+            } else if (!keepingFirstBlockComment) {
                 prevC = c;
+                continue;
             }
-            continue;
         } else if (prevC == '/') {
             if (c == '/') {
                 prevC = '';
@@ -67,6 +78,10 @@ function getCommentFreeLine(line: string, inBlockComment: boolean): [string, boo
                 inBlockComment = true;
                 prevC = '';
                 commentExists = true;
+                if (keepFirstBlockComment && !firstBlockCommentKept) {
+                    keepingFirstBlockComment = true;
+                    commFreeLine.push('/*');
+                }
                 continue;
             }
         }
@@ -76,18 +91,26 @@ function getCommentFreeLine(line: string, inBlockComment: boolean): [string, boo
         
     }
 
-    commFreeLine.push(prevC);
+    if (!inBlockComment && !keepingFirstBlockComment) {
+        commFreeLine.push(prevC);
+    }
 
     line = commFreeLine.join("")
 
-    return [line, inBlockComment, commentExists && line == ""];
+    return [line, inBlockComment, commentExists && line == "", firstBlockCommentKept];
 }
 
 function processFile(filePath: string) {
+
     // skip already included files
     if (includedFilePaths[filePath]) {
         return;
     }
+
+    var thisIsFirstFile = isFirstFile;
+    isFirstFile = false;
+
+    var firstBlockCommentKept = false;
 
     includedFilePaths[filePath] = true;
 
@@ -119,15 +142,21 @@ function processFile(filePath: string) {
                 incFilePath += ".d.ts";
             }
             processFile(path.isAbsolute(incFilePath) ? incFilePath : path.join(fileDir, incFilePath));
-        } else {
+        } else if (stripComments) {
 
             let wholeLineInBlockComm: boolean;
-            [line, inBlockComment, wholeLineInBlockComm] = getCommentFreeLine(line, inBlockComment);
-    
+            let firstBlockCommentKeptNow: boolean;
+            [line, inBlockComment, wholeLineInBlockComm, firstBlockCommentKeptNow] = getCommentFreeLine(line, inBlockComment, thisIsFirstFile && keepFirstBlockComment && !firstBlockCommentKept);
+            if (firstBlockCommentKeptNow) {
+                firstBlockCommentKept = true;
+            }
+
             if (!wholeLineInBlockComm) {
-                outLines.push(line)
+                outLines.push(line);
             }
     
+        } else {
+            outLines.push(line);
         }
 
     });
@@ -170,7 +199,7 @@ for (let i=2; i<process.argv.length; i++) {
             licenseFilePath = process.argv[++i];
             break;
 
-        case "-c":
+        case "-s":
         case "--stripcomm":
             stripComments = true;
             break;
@@ -178,6 +207,11 @@ for (let i=2; i<process.argv.length; i++) {
         case "-i":
         case "--info":
             infoComments = true;
+            break;
+
+        case "-k":
+        case "--keep":
+            keepFirstBlockComment = true;
             break;
 
         default:
