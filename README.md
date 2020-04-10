@@ -1,5 +1,5 @@
-# d.ts.merge
- Merges all includes of a lib.d.ts file into a single file.
+# dtsmerge
+ Merges all includes of a TypeScript lib.d.ts file into a single file.
 
 ## Installation
 
