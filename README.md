@@ -3,7 +3,7 @@
 
 ## Installation
 
-`go install github.com\jviksne\d.ts.merge`
+`npm install -g github.com\jviksne\dtsmerge`
 
 ## Usage
 
