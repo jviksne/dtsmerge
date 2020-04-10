@@ -103,7 +103,9 @@ function processFile(filePath) {
     catch (e) {
         return exitWithError("Error reading library file!\n%s", e); // file path is present in error message
     }
-    outLines.push("\n" + (infoComments ? "// START OF " + path.basename(filePath) : ""));
+    if (infoComments) {
+        outLines.push((infoComments ? "// START OF " + path.basename(filePath) : "") + newline);
+    }
     var lines = data.split(/\r?\n/);
     var inBlockComment = false;
     lines.forEach(function (line) {
