@@ -145,8 +145,6 @@ if (process.argv.length == 2) {
 
 for (let i=2; i<process.argv.length; i++) {
 
-    console.log("Argument %d: %s", i, process.argv[i]);
-
     switch (process.argv[i]) {
 
         case "-h":
