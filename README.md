@@ -3,7 +3,7 @@
 
 ## Installation
 
-Download the files and run the following command from the base directory:
+Download the files and run the following command within the base directory:
 
 `npm install -g`
 
