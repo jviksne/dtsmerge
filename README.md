@@ -1,9 +1,9 @@
-# d.ts.merge
- Merges all includes of a lib.d.ts file into a single file.
+# dtsmerge
+ Merges all includes of a TypeScript lib.d.ts file into a single file.
 
 ## Installation
 
-Download the files and run the following command from the base directory:
+Download the files and run the following command within the base directory:
 
 `npm install -g`
 
