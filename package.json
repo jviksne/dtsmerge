@@ -1,0 +1,28 @@
+{
+  "name": "dtsmerge",
+  "version": "1.0.0",
+  "description": "A command-line tool for merging TypeScript declaration files into a single file.",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jviksne/dtsmerge.git"
+  },
+  "keywords": [
+    "libdts"
+  ],
+  "author": "Janis Viksne",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jviksne/dtsmerge/issues"
+  },
+  "homepage": "https://github.com/jviksne/dtsmerge#readme",
+  "bin": {
+    "dtsmerge": "./bin/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^13.11.1"
+  }
+}

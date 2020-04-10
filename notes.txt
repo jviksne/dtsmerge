@@ -1,0 +1,45 @@
+GitHub Desktop > File > New Repository
+
+cmd:
+	cd ...project root dir...
+	mkdir bin
+	mkdir src
+	npm init
+		package name: (d.ts.merge)
+		version: (1.0.0)
+		description: A command-line tool for merging TypeScript declaration files into a single file.
+		entry point: bin/index.js
+		test command:
+		git repository: https://github.com/jviksne/d.ts.merge
+		keywords: lib.d.ts
+		author: Janis Viksne
+		license: (ISC) MIT
+
+Edit package.json:
+	+ "bin": {
+	+   "dtsmerge": "./bin/index.js"
+	+ }
+
+cmd:
+	cd ...project root dir...
+	tsc --init
+	npm install --save-dev @types/node
+
+Edit tsconfig.json:
+    + "outDir": "./bin",
+    + "rootDir": "./src",
+	
+Create src/index.ts.
+
+Add the following to the first line in order for it not to be necessary
+to type "node dtsmerge" from command line (otherwise Windows Script Host
+will try to run the .js file):
+#!/usr/bin/env node
+
+Implement the code in src/index.ts.
+
+cmd
+	cd ...project root dir...
+	tsc
+	npm install -g
+	dtsmerge
