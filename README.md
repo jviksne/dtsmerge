@@ -3,7 +3,6 @@
 
 ## Installation
 
-`npm install -g github.com\jviksne\dtsmerge`
 
 ## Usage
 
